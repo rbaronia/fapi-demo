@@ -41,6 +41,29 @@ Orchestrates consent via the webhook.
 
 Issues the sender-constrained (DPoP) Access Token.
 
+## 📊 Sequence Diagram (FAPI 2.0 Flow)
+
+```mermaid
+sequenceDiagram
+    participant Client as 💻 Client App (TPP)
+    participant Verify as 🛡️ IBM Verify (AS)
+    participant Bank as 🏦 Bank API (RS)
+
+    Note over Client: 1. Init & Generate DPoP Keys (RSA)
+    Client->>Verify: 2. Pushed Auth Request (PAR) [POST /par]
+    Verify-->>Client: 3. Return 'request_uri'
+    Client->>Verify: 4. Redirect User for Consent
+    Verify->>Client: 5. Return Auth Code
+    
+    Note over Client: Sign Request with DPoP Key
+    Client->>Verify: 6. Exchange Code for Token [POST /token]
+    Verify-->>Client: 7. Return Access Token (DPoP Bound)
+
+    Note over Client: Sign Request with DPoP Key
+    Client->>Bank: 8. Fetch Data [GET /accounts]
+    Bank->>Bank: Validate Token & DPoP Proof
+    Bank-->>Client: 9. Return Sensitive Data (JSON)
+    
 ⚙️ IBM Verify Configuration
 To run this demo, you must configure your IBM Verify tenant as follows:
 
